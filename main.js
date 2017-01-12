@@ -14,6 +14,10 @@
     return f;
   }
   
+  function Proto(superClass, proto){
+    return extend(Object.create(superClass.prototype, proto || {}));
+  }
+  
   var DOM = def(function(dom){
     var t = typeof dom;
     if(t === 'string'){
@@ -172,12 +176,12 @@
     Elm.call(this, 'li');
     this.span = new Elm('span').attr({textContent: text || ''});
     this.add(this.span);
-  }, extend({
+  }, Proto(Elm, {
     change: function(text){},
     delete: function(){},
     check: function(){},
     isChecked: function(){},
-  }, Elm.prototype));
+  }));
   
   // #main
   var todoList = new Elm('ol').setTarget('#todoList');
