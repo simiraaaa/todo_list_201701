@@ -1,6 +1,8 @@
 # todo list
 生js
 
+https://simiraaaa.github.io/todo_list_201701
+
 - step1 ... todo の追加フォームを作成
 - step2 ... todo list を表示
 - step3 ... todo list 情報を localStorage に保存(json についても説明)
