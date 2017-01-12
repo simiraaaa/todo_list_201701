@@ -279,7 +279,19 @@
       {
         tagName: 'span',
         name: 'span',
-        attr: {textContent: text},
+        attr: {
+          textContent: text,
+          onclick: function(){
+            this.contentEditable = true;
+          },
+          onkeydown: function(e){
+            if(e.keyCode === 13){
+              e.preventDefault();
+              this.contentEditable = false;
+              self.change(this.textContent);
+            }
+          }
+        },
         style: {padding: '0 10px'}
       }
     ]);
@@ -287,8 +299,11 @@
     getText: function(){
       return this.span._attr.textContent;
     },
-    change: function(text){
-      this.span.attr({textContent: text}).updateDOM();
+    change: function(text, update){
+      this.span.attr({textContent: text});
+      if(update) {
+        this.span.updateDOM();
+      }
       save();
       return this;
     },
