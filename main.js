@@ -276,6 +276,9 @@
   var Todo = def(function(text){
     Elm.call(this, 'li');
     var self = this;
+    this.style({
+      margin: '8px 0',
+    });
     this.fromJSON([
       {
         name: 'checkbox',
@@ -308,7 +311,10 @@
         name: 'span',
         attr: {
           textContent: text,
-          onclick: function(){
+          onmousedown: function(){
+            this.contentEditable = true;
+          },
+          ontouchstart: function(){
             this.contentEditable = true;
           },
           onkeydown: function(e){
@@ -319,7 +325,10 @@
             }
           }
         },
-        style: {padding: '0 10px'}
+        style: {
+          padding: '2px 10px',
+          margin: '4px'
+        }
       }
     ]);
   }, Proto(Elm, {
