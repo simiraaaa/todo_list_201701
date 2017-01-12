@@ -15,7 +15,7 @@
   }
   
   function Proto(superClass, proto){
-    return extend(Object.create(superClass.prototype, proto || {}));
+    return extend(Object.create(superClass.prototype), proto || {});
   }
   
   var DOM = def(function(dom){
@@ -48,6 +48,20 @@
       extend(this.dom, o);
       return this;
     },
+    
+    removeAttributeAll: function(){
+      var dom = this.dom;
+      if(dom.hasAttributes()) {
+        var attrNames = [].map.call(dom.attributes, function(a){
+          return a.name;
+        });
+        attrNames.forEach(function(n){
+          dom.removeAttribute(n);
+        });
+      }
+      return this;
+    },
+    
     style: function(o){
       if(o){
         extend(this.dom.style, o);
@@ -56,6 +70,17 @@
       else {
         return this.dom.style;
       }
+    },
+    
+    removeStyleAll: function(){
+      var style = this.dom.style;
+      if(style.length > 0) {
+        var names = [].slice.call(style, 0);
+        names.forEach(function(n){
+          style.removeProperty(n);
+        });
+      }
+      return this;
     },
     
     append: function(child){
@@ -103,6 +128,7 @@
     this.children = [];
     this.tagName = tagName;
     this.parent = null;
+    this.dom = null;
   },{
     attr: function(o){
       extend(this._attr, o);
@@ -141,6 +167,11 @@
       return this;
     },
     
+    removeChildAll: function(){
+      this.children.length = 0;
+      return this;
+    },
+    
     toDom: function(){
       var dom = DOM.create(this.tagName || 'div');
       dom.attr(this._attr).style(this._style);
@@ -152,6 +183,28 @@
     
     update: function(){
       this.target.removeChildAll().append(this.toDom());
+      return this;
+    },
+    
+    updateDOM: function(dom){
+      dom = dom || this.dom;
+      if(!dom){
+        return this;
+      }
+      if(!(dom instanceof DOM)) {
+        dom = new DOM(dom);
+      }
+      
+      dom.removeChildAll()
+      .removeAttributeAll()
+      .removeStyleAll()
+      .attr(this._attr)
+      .style(this._style);
+      
+      this.children.forEach(function(c){
+        dom.append(c.toDom());
+      });
+      
       return this;
     },
     
@@ -172,19 +225,49 @@
     
   });
   
+  // #main
+  var STORAGE_KEY = 'todolist201701';
+  
+  
   var Todo = def(function(text){
     Elm.call(this, 'li');
     this.span = new Elm('span').attr({textContent: text || ''});
     this.add(this.span);
   }, Proto(Elm, {
+    getText: function(){
+      return this.span._attr.textContent;
+    },
     change: function(text){},
     delete: function(){},
     check: function(){},
     isChecked: function(){},
   }));
   
-  // #main
+  
   var todoList = new Elm('ol').setTarget('#todoList');
+  
+  todoList.toJSON = function(){
+    return this.children.map(function(child){
+      return {
+        text: child.getText(),
+      };
+    });
+  };
+  
+  todoList.fromJSON = function(json){
+    if(!json) return this;
+    if(typeof json === 'string'){
+      json = JSON.parse(json);
+    }
+    var self = this;
+    json.forEach(function(o){
+      var todo = new Todo(o.text);
+      
+      self.add(todo);
+    });
+    
+    return this;
+  };
   var createInput = DOM.id('createInput').attr({
     onkeydown: function(e){
       if(e.keyCode === 13){
@@ -205,6 +288,18 @@
   function createTODO(text){
     todoList.add(new Todo(text));
     todoList.update();
+    save();
   }
+  
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todoList));
+  }
+  
+  function load(){
+    todoList.removeChildAll();
+    todoList.fromJSON(localStorage.getItem(STORAGE_KEY)).update();
+  }
+  
+  load();
   
 })();
