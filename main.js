@@ -99,6 +99,15 @@
       return this;
     },
     
+    remove: function(){
+      var dom = this.dom;
+      if(dom.parentNode){
+        dom.parentNode.removeChild(dom);
+      }
+      this.parent = null;
+      return this;
+    },
+    
     removeChildAll: function(){
       var dom = this.dom;
       var c;
@@ -155,15 +164,23 @@
       return this;
     },
     
-    remove: function(){
-      this.parent.removeChild(this);
+    remove: function(withDom){
+      this.parent.removeChild(this, withDom);
       return this;
     },
     
-    removeChild: function(c){
+    removeChild: function(c, withDom){
       c.parent = null;
       var i = this.children.indexOf(c);
       this.children.splice(i, 1);
+      
+      if(withDom && c.dom) {
+        var dom = c.dom;
+        if(!dom.dom) {
+          dom = new DOM(dom);
+        }
+        dom.remove();
+      }
       return this;
     },
     
@@ -277,6 +294,16 @@
         },
       },
       {
+        tagName: 'button',
+        name: 'button',
+        attr: {
+          textContent: '削除',
+          onclick: function(){
+            self.delete();
+          }
+        }
+      },
+      {
         tagName: 'span',
         name: 'span',
         attr: {
@@ -307,7 +334,10 @@
       save();
       return this;
     },
-    delete: function(){},
+    delete: function(){
+      this.remove(true);
+      save();
+    },
     check: function(){
       this.span.style({
         textDecoration: 'line-through'
