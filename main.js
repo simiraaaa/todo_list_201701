@@ -178,6 +178,7 @@
       this.children.forEach(function(child){
         dom.append(child.toDom());
       });
+      this.dom = dom;
       return dom;
     },
     
@@ -186,8 +187,8 @@
       return this;
     },
     
-    updateDOM: function(dom){
-      dom = dom || this.dom;
+    updateDOM: function(childUpdate){
+      var dom = this.dom;
       if(!dom){
         return this;
       }
@@ -195,15 +196,17 @@
         dom = new DOM(dom);
       }
       
-      dom.removeChildAll()
+      if(childUpdate !== false) {
+        dom.removeChildAll();
+        this.children.forEach(function(c){
+          dom.append(c.toDom());
+        });
+      }
+      dom
       .removeAttributeAll()
       .removeStyleAll()
       .attr(this._attr)
       .style(this._style);
-      
-      this.children.forEach(function(c){
-        dom.append(c.toDom());
-      });
       
       return this;
     },
@@ -221,8 +224,32 @@
       elm.attr(this._attr).style(this._style);
       elm.children = this.children.slice(0);
       return elm;
-    }
+    },
     
+    fromJSON: function(json){
+      if(typeof json === 'string'){
+        json = JSON.parse(json);
+      }
+      json.forEach(function(o){
+        var elm = new Elm(o.tagName).attr(o.attr || {}).style(o.style || {});
+        if(o.name) {
+          this[o.name] = elm;
+        }
+        if(o.children) {
+          elm.fromJSON(o.children);
+        }
+        
+        this.add(elm);
+      }, this);
+      
+      return this;
+    },
+    
+  }, {
+    fromJSON: function(json){
+      var elm = new Elm();
+      return elm.fromJSON(json);
+    }
   });
   
   // #main
@@ -231,16 +258,58 @@
   
   var Todo = def(function(text){
     Elm.call(this, 'li');
-    this.span = new Elm('span').attr({textContent: text || ''});
-    this.add(this.span);
+    var self = this;
+    this.fromJSON([
+      {
+        name: 'checkbox',
+        tagName: 'input',
+        attr: {
+          type: 'checkbox',
+          onchange: function(){
+            if(this.checked) {
+              self.check();
+            }
+            else {
+              self.uncheck();
+            }
+            save();
+          }
+        },
+      },
+      {
+        tagName: 'span',
+        name: 'span',
+        attr: {textContent: text},
+        style: {padding: '0 10px'}
+      }
+    ]);
   }, Proto(Elm, {
     getText: function(){
       return this.span._attr.textContent;
     },
-    change: function(text){},
+    change: function(text){
+      this.span.attr({textContent: text}).updateDOM();
+      save();
+      return this;
+    },
     delete: function(){},
-    check: function(){},
-    isChecked: function(){},
+    check: function(){
+      this.span.style({
+        textDecoration: 'line-through'
+      }).updateDOM();
+      this.checkbox.attr({checked: true}).updateDOM(false);
+      return this;
+    },
+    uncheck: function(){
+      this.span.style({
+        textDecoration: ''
+      }).updateDOM();
+      this.checkbox.attr({checked: false}).updateDOM(false);
+      return this;
+    },
+    isChecked: function(){
+      return this.checkbox._attr.checked;
+    },
   }));
   
   
@@ -250,6 +319,7 @@
     return this.children.map(function(child){
       return {
         text: child.getText(),
+        check: child.isChecked(),
       };
     });
   };
@@ -262,7 +332,7 @@
     var self = this;
     json.forEach(function(o){
       var todo = new Todo(o.text);
-      
+      if(o.check) todo.check();
       self.add(todo);
     });
     
