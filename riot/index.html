@@ -57,7 +57,9 @@
         };
         
         this.save = function(){
-          
+          this.data = this.data.filter(function(item){
+            return !item.removed;
+          });
           localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(this.data));
           this.update();
         };
@@ -79,7 +81,7 @@
       <todo>
         <input ref="checkbox" type="checkbox" onchange={check} checked={checked}>
         <button onclick={onclick}>削除</button>
-        <span ref="span" class={done: checked} oninput={oninput} contenteditable="true">{text}</span>
+        <span ref="span" class={done: checked} oninput={oninput} onkeydown={disableNewLine} contenteditable="true">{text}</span>
         <style scoped>
           :scope span {
             padding: 2px 5px;
@@ -99,13 +101,19 @@
           this.item.checked = this.checked;
           this.save();
         };
-        
+        this.disableNewLine = function(e){
+          if(e.keyCode === 13) {
+            e.preventDefault();
+          }
+        };
         this.oninput = function(){
           this.text = this.item.text = this.refs.span.textContent;
           this.save();
         };
         
         this.onclick = function(){
+          this.item.removed = true;
+          this.save();
         };
       </todo>
       
