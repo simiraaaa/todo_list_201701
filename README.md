@@ -1,5 +1,4 @@
 # todo list
-生js
 
 https://simiraaaa.github.io/todo_list_201701
 
