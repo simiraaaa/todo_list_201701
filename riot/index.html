@@ -20,16 +20,21 @@
         <div><button onclick={createTodo}>TODO作成</button></div>
         
         <ol ref="todolist">
-          <li each={data}><todo text={text} checked={checked}></todo></li>
+          <li each={item in data} if={!item.removed}><todo save={save.bind(this)} item={item} text={item.text} checked={item.checked}></todo></li>
         </ol>
         
         <style scoped>
           :scope .createInput{
             width: 50%;
           }
+          
+          :scope ol>li {
+            margin: 8px 0;
+          }
         </style>
         
         var LOCALSTORAGE_KEY = 'todo_list_201701_riot';
+        var self = this;
         this.data = [];
         
         this.enterInput = function(e){
@@ -37,6 +42,10 @@
             e.preventDefault();
             this.createTodo();
           }
+        };
+        
+        this.updateTodo = function(){
+          console.log(this);
         };
         
         this.createTodo = function(){
@@ -48,7 +57,9 @@
         };
         
         this.save = function(){
+          
           localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(this.data));
+          this.update();
         };
         
         this.load = function(){
@@ -66,21 +77,33 @@
       </app>
       
       <todo>
-        <input ref="checkbox" type="checkbox" onchange={onchange}>
+        <input ref="checkbox" type="checkbox" onchange={check} checked={checked}>
         <button onclick={onclick}>削除</button>
-        <span ref="span" oninput={oninput} contenteditable="true">{text}</span>
-        
+        <span ref="span" class={done: checked} oninput={oninput} contenteditable="true">{text}</span>
+        <style scoped>
+          :scope span {
+            padding: 2px 5px;
+            margin: 0 5px;
+          }
+          
+          :scope span.done {
+            text-decoration: line-through;
+          }
+        </style>
         this.checked = opts.checked;
         this.text = opts.text;
-        
-        this.onchange = function(){
+        this.item = opts.item || {};
+        this.save = opts.save || function(){};
+        this.check = function(){
           this.checked = this.refs.checkbox.checked;
+          this.item.checked = this.checked;
+          this.save();
         };
         
-        this.oninput = function(){};
+        this.oninput = function(){
+        };
         
         this.onclick = function(){
-          console.log(this);
         };
       </todo>
       
