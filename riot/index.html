@@ -29,6 +29,7 @@
           }
         </style>
         
+        var LOCALSTORAGE_KEY = 'todo_list_201701_riot';
         this.data = [];
         
         this.enterInput = function(e){
@@ -43,15 +44,24 @@
             checked: false,
             text: this.refs.createInput.value
           });
+          this.save();
         };
         
         this.save = function(){
-          
+          localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(this.data));
         };
         
         this.load = function(){
-          
+          var json = localStorage.getItem(LOCALSTORAGE_KEY);
+          if(json){
+            this.data = JSON.parse(json);
+            this.update();
+          }
         };
+        
+        this.on('mount', function(){
+          this.load();
+        });
         
       </app>
       
