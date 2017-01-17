@@ -1,0 +1,52 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>todo riot</title>
+    <meta name="description" content="" />
+    <script src="https://cdn.jsdelivr.net/riot/3.0.7/riot+compiler.js"></script>
+  </head>
+  <body>
+    
+    <app></app>
+    
+    <script type="riot/tag">
+      <app>
+      
+        <div><input class="createInput" type="text"></input></div>
+        <div><button onclick={}>TODO作成</button></div>
+        
+        <ol name="list"></ol>
+        
+        <style scoped>
+          :scope .createInput{
+            width: 50%;
+          }
+        </style>
+        
+        this.createTodo = function(){
+          
+        };
+        
+        this.save = function(){
+          
+        };
+        
+        this.load = function(){
+          
+        };
+        
+      </app>
+      
+      
+    </script>
+    
+    <script>
+    riot.mount('*');
+    </script>
+  </body>
+</html>
+
