@@ -16,10 +16,12 @@
     <script type="riot/tag">
       <app>
       
-        <div><input class="createInput" type="text"></input></div>
-        <div><button onclick={}>TODO作成</button></div>
+        <div><input ref="createInput" onkeydown={enterInput} class="createInput" type="text"></input></div>
+        <div><button onclick={createTodo}>TODO作成</button></div>
         
-        <ol name="list"></ol>
+        <ol ref="todolist">
+          <li each={data}><todo text={text} checked={checked}></todo></li>
+        </ol>
         
         <style scoped>
           :scope .createInput{
@@ -27,8 +29,20 @@
           }
         </style>
         
+        this.data = [];
+        
+        this.enterInput = function(e){
+          if(e.keyCode === 13){
+            e.preventDefault();
+            this.createTodo();
+          }
+        };
+        
         this.createTodo = function(){
-          
+          this.data.push({
+            checked: false,
+            text: this.refs.createInput.value
+          });
         };
         
         this.save = function(){
@@ -41,6 +55,24 @@
         
       </app>
       
+      <todo>
+        <input ref="checkbox" type="checkbox" onchange={onchange}>
+        <button onclick={onclick}>削除</button>
+        <span ref="span" oninput={oninput} contenteditable="true">{text}</span>
+        
+        this.checked = opts.checked;
+        this.text = opts.text;
+        
+        this.onchange = function(){
+          this.checked = this.refs.checkbox.checked;
+        };
+        
+        this.oninput = function(){};
+        
+        this.onclick = function(){
+          console.log(this);
+        };
+      </todo>
       
     </script>
     
