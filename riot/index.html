@@ -101,6 +101,8 @@
         };
         
         this.oninput = function(){
+          this.text = this.item.text = this.refs.span.textContent;
+          this.save();
         };
         
         this.onclick = function(){
